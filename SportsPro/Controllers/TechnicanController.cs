@@ -27,12 +27,12 @@ namespace SportsPro.Controllers
             return View(); // Views/Technician/About.cshtml (optional)
         }
 
-        // GET: /Technician/Add
+       
+// GET: /Technician/Add
         [HttpGet]
         public IActionResult Add()
         {
-            // Note: view file is AddTehnician.cshtml with your spelling
-            return View(viewName: "AddTehnician", model: new Technician());
+            return View(viewName: "AddTechnician", model: new Technician());
         }
 
         // POST: /Technician/Add
@@ -42,7 +42,8 @@ namespace SportsPro.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(viewName: "AddTehnician", model);
+                // Required fields will be flagged and shown in the view
+                return View(viewName: "AddTechnician", model);
             }
 
             _context.Technicians.Add(model);
@@ -59,8 +60,7 @@ namespace SportsPro.Controllers
             var tech = await _context.Technicians.FindAsync(id.Value);
             if (tech is null) return NotFound();
 
-            // Note: view file is EditTechnician.cshtml
-            return View(viewName: "EditTechnician", model: tech);
+            return View(viewName: "EditTechnican", model: tech);
         }
 
         // POST: /Technician/Edit/5
@@ -72,7 +72,8 @@ namespace SportsPro.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(viewName: "EditTechnician", model);
+                // Required fields will be flagged and shown in the view
+                return View(viewName: "EditTechnican", model);
             }
 
             try
@@ -89,6 +90,7 @@ namespace SportsPro.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: /Technician/Delete/5
         [HttpGet]

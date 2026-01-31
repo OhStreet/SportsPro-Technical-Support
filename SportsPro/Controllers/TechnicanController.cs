@@ -20,7 +20,7 @@ public IActionResult Add()
 }
 
 [HttpGet]
-public IActionResult Edit()
+public IActionResult Edit(int id)
 {
    
 }
@@ -32,7 +32,7 @@ public IActionResult Edit()
 }
 
 [HttpGet]
-public IActionResult Delete()
+public IActionResult Delete(int id)
 {
     
 }

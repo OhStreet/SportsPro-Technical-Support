@@ -14,27 +14,25 @@ namespace SportsPro.Controllers
             _context = context;
         }
 
-        // GET: /Technician
         public async Task<IActionResult> Index()
         {
             var techs = await _context.Technicians
                 .OrderBy(t => t.Name)
                 .ToListAsync();
-
-            return View(techs); // Views/Technician/Index.cshtml
+            return View(techs); // Views/Technician/Index.cshtml (name conventional)
         }
 
-        // GET: /Technician/About
         public IActionResult About()
         {
-            return View(); // Views/Technician/About.cshtml
+            return View(); // Views/Technician/About.cshtml (optional)
         }
 
         // GET: /Technician/Add
         [HttpGet]
         public IActionResult Add()
         {
-            return View(new Technician()); // Views/Technician/Add.cshtml
+            // Note: view file is AddTehnician.cshtml with your spelling
+            return View(viewName: "AddTehnician", model: new Technician());
         }
 
         // POST: /Technician/Add
@@ -44,12 +42,11 @@ namespace SportsPro.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View(viewName: "AddTehnician", model);
             }
 
             _context.Technicians.Add(model);
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -62,7 +59,8 @@ namespace SportsPro.Controllers
             var tech = await _context.Technicians.FindAsync(id.Value);
             if (tech is null) return NotFound();
 
-            return View(tech); // Views/Technician/Edit.cshtml
+            // Note: view file is EditTechnician.cshtml
+            return View(viewName: "EditTechnician", model: tech);
         }
 
         // POST: /Technician/Edit/5
@@ -74,7 +72,7 @@ namespace SportsPro.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return View(viewName: "EditTechnician", model);
             }
 
             try
@@ -86,7 +84,7 @@ namespace SportsPro.Controllers
             {
                 var exists = await _context.Technicians.AnyAsync(t => t.TechnicianId == id);
                 if (!exists) return NotFound();
-                throw; // rethrow if it was a real concurrency conflict
+                throw;
             }
 
             return RedirectToAction(nameof(Index));
@@ -103,12 +101,13 @@ namespace SportsPro.Controllers
 
             if (tech is null) return NotFound();
 
-            return View(tech); // Views/Technician/Delete.cshtml (confirmation)
+            return View(tech); // Views/Technician/Delete.cshtml (conventional)
         }
 
         // POST: /Technician/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ActionName("Delete")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var tech = await _context.Technicians.FindAsync(id);

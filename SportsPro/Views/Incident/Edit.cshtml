@@ -1,0 +1,69 @@
+@model Incident
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    string title = ViewBag.Action + " Incident";
+    ViewData["Title"] = title;
+}
+
+<h1>@ViewBag.Action Incident</h1>
+
+<form asp-action="Edit" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <input type="hidden" asp-for="IncidentID" />
+
+    <div class="mb-3">
+        <label asp-for="CustomerID" class="form-label">Customer</label>
+        <select asp-for="CustomerID" class="form-select"
+                asp-items="@(new SelectList(ViewBag.Customers, "CustomerID", "FullName"))">
+            <option value="0">-- Select customer --</option>
+        </select>
+        <span asp-validation-for="CustomerID" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ProductID" class="form-label">Product</label>
+        <select asp-for="ProductID" class="form-select"
+                asp-items="@(new SelectList(ViewBag.Products, "ProductID", "Name"))">
+            <option value="0">-- Select product --</option>
+        </select>
+        <span asp-validation-for="ProductID" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TechnicianID" class="form-label">Technician</label>
+        <select asp-for="TechnicianID" class="form-select"
+                asp-items="@(new SelectList(ViewBag.Technicians, "TechnicianID", "Name"))">
+            <option value="0">-- Select technician --</option>
+        </select>
+        <span asp-validation-for="TechnicianID" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DateOpened" class="form-label">Date Opened</label>
+        <input asp-for="DateOpened" type="date" class="form-control" />
+        <span asp-validation-for="DateOpened" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DateClosed" class="form-label">Date Closed</label>
+        <input asp-for="DateClosed" type="date" class="form-control" />
+        <span asp-validation-for="DateClosed" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-controller="Incident" asp-action="List" class="btn btn-secondary">Cancel</a>
+</form>

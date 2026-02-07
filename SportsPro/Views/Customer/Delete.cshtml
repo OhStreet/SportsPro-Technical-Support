@@ -1,29 +1,16 @@
-
-@model YourApp.Models.Customer
+@model Customer
 @{
     ViewData["Title"] = "Delete Customer";
 }
 
-<h1>Delete Customer</h1>
-<p>Are you sure you want to delete this customer?</p>
+<h1 class="mb-5">Confirm Deletion</h1>
+<h3 class="mb-5">
+    Are you sure you want to delete @Model.FullName?
+</h3>
 
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">@Model.FirstName @Model.LastName</h5>
-        <p class="card-text">
-            @Model.Address<br />
-            @Model.City, @Model.State @Model.PostalCode<br />
-            @Model.Country?.Name
-        </p>
-        <p class="card-text">
-            <strong>Email:</strong> @Model.Email ?? "<span class="text-muted">None</span>"<br />
-            <strong>Phone:</strong> @Model.Phone ?? "<span class="text-muted">None</span>"
-        </p>
-    </div>
-</div>
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="CustomerID" />
 
-DeleteConfirmed
-<input type="hidden" asp-for="Id" />
-<button type="submit" class="btn btn-danger">Confirm Delete</button>
-    IndexCancel</a>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-controller="Customer" asp-action="List" class="btn btn-secondary">Cancel</a>
 </form>

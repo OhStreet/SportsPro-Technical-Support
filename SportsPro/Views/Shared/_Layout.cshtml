@@ -19,17 +19,35 @@
                         aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+                <!--Addition, specifying active links - JS-->
+                @{
+                    string c = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+                    string a = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+                }
                 <nav class="collapse navbar-collapse" id="navbarSupportedContent">
                     <div class="navbar-nav me-auto">
-                        <a class="nav-item nav-link active" asp-controller="Home" asp-action="Index">Home</a>
-                        <a class="nav-item nav-link active" asp-controller="Product" asp-action="List">Products</a>
-                        <a class="nav-item nav-link active" asp-controller="Technician" asp-action="List">Technicians</a>
-                        <a class="nav-item nav-link active" asp-controller="Customer" asp-action="List">Customers</a>
-                        <a class="nav-item nav-link active" asp-controller="Incident" asp-action="List">Incidents</a>
-                        <a class="nav-item nav-link active" asp-controller="Registration" asp-action="Index">Registrations</a>
+                        <a class="nav-item nav-link @(c == "Home" && a == "Index" ? "active" : "")"
+                           asp-controller="Home" asp-action="Index">Home</a>
+
+                        <a class="nav-item nav-link @(c == "Product" ? "active" : "")"
+                           asp-controller="Product" asp-action="List">Products</a>
+
+                        <a class="nav-item nav-link @(c == "Technician" ? "active" : "")"
+                           asp-controller="Technician" asp-action="List">Technicians</a>
+
+                        <a class="nav-item nav-link @(c == "Customer" ? "active" : "")"
+                           asp-controller="Customer" asp-action="List">Customers</a>
+
+                        <a class="nav-item nav-link @(c == "Incident" ? "active" : "")"
+                           asp-controller="Incident" asp-action="List">Incidents</a>
+
+                        <a class="nav-item nav-link @(c == "Registration" ? "active" : "")"
+                           asp-controller="Registration" asp-action="Index">Registrations</a>
                     </div>
+
                     <div class="navbar-nav ms-auto">
-                        <a class="nav-item nav-link active" asp-controller="Home" asp-action="About">About</a>
+                        <a class="nav-item nav-link @(c == "Home" && a == "About" ? "active" : "")"
+                           asp-controller="Home" asp-action="About">About</a>
                     </div>
                 </nav>
             </div>
@@ -45,9 +63,9 @@
         <div class="container">&copy; @DateTime.Now.Year - SportsPro</div>
     </footer> 
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <!--Removed jQuery libraries - JS-->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>
+

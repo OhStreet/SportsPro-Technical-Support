@@ -45,6 +45,10 @@
                            asp-controller="Registration" asp-action="Index">Registrations</a>
                     </div>
 
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About</a>
+                        </li>
+
                     <div class="navbar-nav ms-auto">
                         <a class="nav-item nav-link @(c == "Home" && a == "About" ? "active" : "")"
                            asp-controller="Home" asp-action="About">About</a>
@@ -68,4 +72,5 @@
     @RenderSection("Scripts", required: false)
 </body>
 </html>
+
 

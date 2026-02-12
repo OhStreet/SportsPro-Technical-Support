@@ -11,8 +11,12 @@ namespace SportsPro.Controllers
 
         public IActionResult About()
         {
+        
+        ViewData["Message"] = "SportsPro helps manage customer incidents and product support workflows.";
+            ViewData["Version"] = "v1.0.0";
             return View();
         }
 
     }
+
 }

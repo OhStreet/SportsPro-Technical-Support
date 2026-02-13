@@ -1,9 +1,12 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsPro.Models;
+using System.Linq; // Needed for OrderBy / ThenBy
 
 namespace SportsPro.Controllers
 {
+    [Route("customers")]
     public class CustomerController : Controller
     {
         private SportsProContext context;
@@ -21,7 +24,8 @@ namespace SportsPro.Controllers
                 .ToList();
         }
 
-        [HttpGet]
+        // GET /customers
+        [HttpGet("")]
         public IActionResult List()
         {
             var customers = context.Customers
@@ -33,7 +37,8 @@ namespace SportsPro.Controllers
             return View(customers);
         }
 
-        [HttpGet]
+        // GET /customers/add
+        [HttpGet("add")]
         public IActionResult Add()
         {
             ViewBag.Action = "Add";
@@ -41,21 +46,26 @@ namespace SportsPro.Controllers
             return View("Edit", new Customer());
         }
 
-        [HttpGet]
+        // GET /customers/edit/5
+        [HttpGet("edit/{id:int}")]
         public IActionResult Edit(int id)
         {
             ViewBag.Action = "Edit";
             LoadCountries();
 
             var customer = context.Customers.Find(id);
+            if (customer == null) return NotFound();
+
             return View("Edit", customer);
         }
 
-        [HttpPost]
+        // POST /customers/edit
+        [HttpPost("edit")]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Customer customer)
         {
             System.Diagnostics.Debug.WriteLine($"CountryID POSTED = '{customer.CountryID}'");
+
             if (ModelState.IsValid)
             {
                 if (customer.CustomerID == 0)
@@ -68,7 +78,7 @@ namespace SportsPro.Controllers
                 }
 
                 context.SaveChanges();
-                return RedirectToAction("List", "Customer");
+                return RedirectToAction(nameof(List));
             }
             else
             {
@@ -78,23 +88,27 @@ namespace SportsPro.Controllers
             }
         }
 
-        [HttpGet]
+        // GET /customers/delete/5
+        [HttpGet("delete/{id:int}")]
         public IActionResult Delete(int id)
         {
             var customer = context.Customers
                 .Include(c => c.Country)
                 .FirstOrDefault(c => c.CustomerID == id);
 
+            if (customer == null) return NotFound();
+
             return View(customer);
         }
 
-        [HttpPost]
+        // POST /customers/delete
+        [HttpPost("delete")]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Customer customer)
         {
             context.Customers.Remove(customer);
             context.SaveChanges();
-            return RedirectToAction("List", "Customer");
+            return RedirectToAction(nameof(List));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace SportsPro.Controllers
 {
@@ -9,11 +9,10 @@ namespace SportsPro.Controllers
             return View();
         }
 
+        [Route("About")]
         public IActionResult About()
         {
-        
-        ViewData["Message"] = "SportsPro helps manage customer incidents and product support workflows.";
-            ViewData["Version"] = "v1.0.0";
+
             return View();
         }
 

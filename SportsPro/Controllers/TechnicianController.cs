@@ -1,11 +1,8 @@
-
 using Microsoft.AspNetCore.Mvc;
 using SportsPro.Models;
-using System.Linq; // Needed for Where/OrderBy
 
 namespace SportsPro.Controllers
 {
-    [Route("technicians")]
     public class TechnicianController : Controller
     {
         // Database context for accessing Technicians table
@@ -17,8 +14,8 @@ namespace SportsPro.Controllers
             this.context = ctx;
         }
 
-        // GET /technicians
-        [HttpGet("")]
+        [HttpGet]
+        [Route("Technicians")]
         public IActionResult List()
         {
             // Get all technicians except the placeholder (-1), ordered by name
@@ -30,8 +27,8 @@ namespace SportsPro.Controllers
             return View(technicians);
         }
 
-        // GET /technicians/add
-        [HttpGet("add")]
+
+        [HttpGet]
         public IActionResult Add()
         {
             // Tell the shared Edit view we are adding a technician
@@ -41,8 +38,7 @@ namespace SportsPro.Controllers
             return View("Edit", new Technician());
         }
 
-        // GET /technicians/edit/5
-        [HttpGet("edit/{id:int}")]
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             // Tell the shared Edit view we are editing
@@ -50,14 +46,10 @@ namespace SportsPro.Controllers
 
             // Find the technician by primary key
             var technician = context.Technicians.Find(id);
-            if (technician == null) return NotFound();
-
             return View(technician);
         }
 
-        // POST /technicians/edit
-        [HttpPost("edit")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         public IActionResult Edit(Technician technician)
         {
             // Only save if validation passes
@@ -78,7 +70,7 @@ namespace SportsPro.Controllers
                 context.SaveChanges();
 
                 // Back to technician list
-                return RedirectToAction(nameof(List));
+                return RedirectToAction("List", "Technician");
             }
             else
             {
@@ -88,27 +80,22 @@ namespace SportsPro.Controllers
             }
         }
 
-        // GET /technicians/delete/5
-        [HttpGet("delete/{id:int}")]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             // Grab technician to confirm deletion
             var technician = context.Technicians.Find(id);
-            if (technician == null) return NotFound();
-
             return View(technician);
         }
 
-        // POST /technicians/delete
-        [HttpPost("delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         public IActionResult Delete(Technician technician)
         {
             // Remove technician
             context.Technicians.Remove(technician);
             context.SaveChanges();
 
-            return RedirectToAction(nameof(List));
+            return RedirectToAction("List", "Technician");
         }
     }
 }

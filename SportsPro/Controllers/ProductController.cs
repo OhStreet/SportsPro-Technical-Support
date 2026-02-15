@@ -1,11 +1,8 @@
-
 using Microsoft.AspNetCore.Mvc;
 using SportsPro.Models;
-using System.Linq; // ensure this is present for OrderBy
 
 namespace SportsPro.Controllers
 {
-    [Route("products")]
     public class ProductController : Controller
     {
         // Database context for accessing Products table
@@ -17,19 +14,16 @@ namespace SportsPro.Controllers
             this.context = ctx;
         }
 
-        // GET /products
-        [HttpGet("")]
+        [HttpGet]
+        [Route("Products")]
         public IActionResult List()
         {
             // Get all products ordered by release date
-            var products = context.Products
-                                  .OrderBy(p => p.ReleaseDate)
-                                  .ToList();
+            var products = context.Products.OrderBy(p => p.ReleaseDate).ToList();
             return View(products);
         }
 
-        // GET /products/add
-        [HttpGet("add")]
+        [HttpGet]
         public IActionResult Add()
         {
             // Tell the shared Edit view we are adding a product
@@ -39,8 +33,7 @@ namespace SportsPro.Controllers
             return View("Edit", new Product());
         }
 
-        // GET /products/edit/5
-        [HttpGet("edit/{id:int}")]
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             // Tell the shared Edit view we are editing
@@ -48,18 +41,14 @@ namespace SportsPro.Controllers
 
             // Find the product by primary key
             var product = context.Products.Find(id);
-            if (product == null) return NotFound();
-
             return View(product);
         }
 
-        // POST /products/edit
-        [HttpPost("edit")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         public IActionResult Edit(Product product)
         {
             // Only save if validation passes
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 // New product if ID is 0
                 if (product.ProductID == 0)
@@ -76,7 +65,7 @@ namespace SportsPro.Controllers
                 context.SaveChanges();
 
                 // Go back to the product list
-                return RedirectToAction(nameof(List));
+                return RedirectToAction("List", "Product");
             }
             else
             {
@@ -88,20 +77,15 @@ namespace SportsPro.Controllers
             }
         }
 
-        // GET /products/delete/5
-        [HttpGet("delete/{id:int}")]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             // Grab the product to confirm deletion
             var product = context.Products.Find(id);
-            if (product == null) return NotFound();
-
             return View(product);
         }
 
-        // POST /products/delete
-        [HttpPost("delete")]
-        [ValidateAntiForgeryToken]
+        [HttpPost]
         public IActionResult Delete(Product product)
         {
             // Remove the product from the database
@@ -111,7 +95,7 @@ namespace SportsPro.Controllers
             context.SaveChanges();
 
             // Back to the product list
-            return RedirectToAction(nameof(List));
+            return RedirectToAction("List", "Product");
         }
     }
 }

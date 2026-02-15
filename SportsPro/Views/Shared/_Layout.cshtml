@@ -45,10 +45,6 @@
                            asp-controller="Registration" asp-action="Index">Registrations</a>
                     </div>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="About">About</a>
-                        </li>
-
                     <div class="navbar-nav ms-auto">
                         <a class="nav-item nav-link @(c == "Home" && a == "About" ? "active" : "")"
                            asp-controller="Home" asp-action="About">About</a>
@@ -65,12 +61,10 @@
 
     <footer class="border-top footer text-muted mt-3 pb-3">
         <div class="container">&copy; @DateTime.Now.Year - SportsPro</div>
-    </footer> 
+    </footer>
 
     <!--Removed jQuery libraries - JS-->
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     @RenderSection("Scripts", required: false)
 </body>
 </html>
-
-

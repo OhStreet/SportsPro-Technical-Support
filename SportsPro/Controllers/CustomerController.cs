@@ -1,12 +1,9 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsPro.Models;
-using System.Linq; // Needed for OrderBy / ThenBy
 
 namespace SportsPro.Controllers
 {
-    [Route("customers")]
     public class CustomerController : Controller
     {
         private SportsProContext context;
@@ -24,8 +21,8 @@ namespace SportsPro.Controllers
                 .ToList();
         }
 
-        // GET /customers
-        [HttpGet("")]
+        [HttpGet]
+        [Route("Customers")]
         public IActionResult List()
         {
             var customers = context.Customers
@@ -37,8 +34,7 @@ namespace SportsPro.Controllers
             return View(customers);
         }
 
-        // GET /customers/add
-        [HttpGet("add")]
+        [HttpGet]
         public IActionResult Add()
         {
             ViewBag.Action = "Add";
@@ -46,26 +42,21 @@ namespace SportsPro.Controllers
             return View("Edit", new Customer());
         }
 
-        // GET /customers/edit/5
-        [HttpGet("edit/{id:int}")]
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             ViewBag.Action = "Edit";
             LoadCountries();
 
             var customer = context.Customers.Find(id);
-            if (customer == null) return NotFound();
-
             return View("Edit", customer);
         }
 
-        // POST /customers/edit
-        [HttpPost("edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Customer customer)
         {
             System.Diagnostics.Debug.WriteLine($"CountryID POSTED = '{customer.CountryID}'");
-
             if (ModelState.IsValid)
             {
                 if (customer.CustomerID == 0)
@@ -78,7 +69,7 @@ namespace SportsPro.Controllers
                 }
 
                 context.SaveChanges();
-                return RedirectToAction(nameof(List));
+                return RedirectToAction("List", "Customer");
             }
             else
             {
@@ -88,27 +79,23 @@ namespace SportsPro.Controllers
             }
         }
 
-        // GET /customers/delete/5
-        [HttpGet("delete/{id:int}")]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             var customer = context.Customers
                 .Include(c => c.Country)
                 .FirstOrDefault(c => c.CustomerID == id);
 
-            if (customer == null) return NotFound();
-
             return View(customer);
         }
 
-        // POST /customers/delete
-        [HttpPost("delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Customer customer)
         {
             context.Customers.Remove(customer);
             context.SaveChanges();
-            return RedirectToAction(nameof(List));
+            return RedirectToAction("List", "Customer");
         }
     }
 }

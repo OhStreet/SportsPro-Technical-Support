@@ -1,17 +1,16 @@
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SportsPro.Models;
 
+// CRUD logic remains the same from Products/Technicians.
+// Only commenting on what is specific to Incidents
+
 namespace SportsPro.Controllers
 {
-    // Base route for all actions in this controller.
-    // This makes URLs start with /incidents
-    [Route("incidents")]
     public class IncidentController : Controller
     {
         // DB context
-        private readonly SportsProContext context;
+        private SportsProContext context;
 
         public IncidentController(SportsProContext context)
         {
@@ -37,10 +36,8 @@ namespace SportsPro.Controllers
                 .ToList();
         }
 
-        // GET /incidents  (default)
-        // GET /incidents/list  (optional, for backwards-compat)
-        [HttpGet("")]
-        [HttpGet("list")]
+        [HttpGet]
+        [Route("Incidents")]
         public IActionResult List()
         {
             var incidents = context.Incidents
@@ -53,8 +50,7 @@ namespace SportsPro.Controllers
             return View(incidents);
         }
 
-        // GET /incidents/add
-        [HttpGet("add")]
+        [HttpGet]
         public IActionResult Add()
         {
             ViewBag.Action = "Add";
@@ -62,8 +58,8 @@ namespace SportsPro.Controllers
             return View("Edit", new Incident());
         }
 
-        // GET /incidents/edit/5
-        [HttpGet("edit/{id:int}")]
+        // Edit GET/POST
+        [HttpGet]
         public IActionResult Edit(int id)
         {
             ViewBag.Action = "Edit";
@@ -73,11 +69,11 @@ namespace SportsPro.Controllers
             return View("Edit", incident);
         }
 
-        // POST /incidents/edit
-        [HttpPost("edit")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Incident incident)
         {
+
             // DEBUG: what did we actually receive?
             System.Diagnostics.Debug.WriteLine(
                 $"POST IncidentID={incident.IncidentID}, CustomerID={incident.CustomerID}, ProductID={incident.ProductID}, TechnicianID={incident.TechnicianID}");
@@ -93,14 +89,17 @@ namespace SportsPro.Controllers
             if (ModelState.IsValid)
             {
                 if (incident.IncidentID == 0)
+                {
                     context.Incidents.Add(incident);
+                }
                 else
+                {
                     context.Incidents.Update(incident);
+                }
 
                 context.SaveChanges();
 
-                // Works with attribute routing too; uses action discovery.
-                return RedirectToAction(nameof(List));
+                return RedirectToAction("List", "Incident");
             }
             else
             {
@@ -110,8 +109,8 @@ namespace SportsPro.Controllers
             }
         }
 
-        // GET /incidents/delete/5
-        [HttpGet("delete/{id:int}")]
+        // Delete GET/POST
+        [HttpGet]
         public IActionResult Delete(int id)
         {
             var incident = context.Incidents
@@ -123,14 +122,13 @@ namespace SportsPro.Controllers
             return View(incident);
         }
 
-        // POST /incidents/delete
-        [HttpPost("delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(Incident incident)
         {
             context.Incidents.Remove(incident);
             context.SaveChanges();
-            return RedirectToAction(nameof(List));
+            return RedirectToAction("List", "Incident");
         }
     }
 }

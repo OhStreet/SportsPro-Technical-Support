@@ -2,20 +2,49 @@
     ViewData["Title"] = "About";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Welcome to SportsPro! This application helps track support incidents, products, technicians, and customers.</p>
+<div class="container py-4">
 
-<section>
-    <h2>What is SportsPro?</h2>
-    <p>
-        SportsPro is a sample ASP.NET Core MVC application. Use it to practice controllers, routing, EF Core, and Razor views.
-    </p>
-</section>
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">@ViewData["Title"]</h1>
+        <p class="lead text-muted">
+            SportsPro Technical Support is committed to delivering reliable,
+            responsive assistance for every product in the SportsPro family.
+        </p>
+    </div>
 
-<section>
-    <h2>Contact</h2>
-    <ul>
-        <li>Email: support@sportspro.example</li>
-        <li>Phone: (555) 123-4567</li>
-    </ul>
-</section>
+    <div class="row g-4">
+
+        <!-- what is sports pro  -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-3">What is SportsPro?</h2>
+                    <p class="card-text">
+                        SportsPro is a sample ASP.NET Core MVC application. 
+                        Use it to practice controllers, routing, 
+                        EF Core, and Razor views.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- contact us! -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="card-title h4 mb-3">Contact</h2>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <strong>Email:</strong> support@sportspro.example
+                        </li>
+                        <li>
+                            <strong>Phone:</strong> (555) 123-4567
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>

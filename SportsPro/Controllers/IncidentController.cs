@@ -37,7 +37,7 @@ namespace SportsPro.Controllers
         }
 
         // Using a ViewModel here to allow for future filtering by status, etc.
-        // and cleaner code in the view.
+        // and cleaner code in the view. Also using subtype ViewResult
         [HttpGet]
         [Route("Incidents")]
         public ViewResult List(IncidentListViewModel model)
@@ -54,6 +54,7 @@ namespace SportsPro.Controllers
         }
 
         // Using a view model here for the Add/Edit views to allow for dropdown lists and cleaner code.
+        // Also using subtype ViewResult
         [HttpGet]
         public ViewResult Add()
         {
@@ -70,6 +71,7 @@ namespace SportsPro.Controllers
 
 
         // Using a view model here for the Add/Edit views to allow for dropdown lists and cleaner code.
+        // Also using subtype ViewResult
         [HttpGet]
         public ViewResult Edit(int id)
         {
@@ -87,6 +89,8 @@ namespace SportsPro.Controllers
         }
 
         // Using a view model here for the Edit POST action to allow for dropdown lists and cleaner code.
+        // This may return either ViewResult or RedirectToActionResult so leaving it as 
+        // IActionResult
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(IncidentFormViewModel model)
@@ -113,8 +117,9 @@ namespace SportsPro.Controllers
 
 
         // Delete GET/POST
+        // Using subtype ViewResult
         [HttpGet]
-        public IActionResult Delete(int id)
+        public ViewResult Delete(int id)
         {
             var incident = context.Incidents
                 .Include(i => i.Customer)
@@ -125,9 +130,10 @@ namespace SportsPro.Controllers
             return View("Delete", incident);
         }
 
+        // Using subtype RedirectToActionResult
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete(Incident incident)
+        public RedirectToActionResult Delete(Incident incident)
         {
             context.Incidents.Remove(incident);
             context.SaveChanges();

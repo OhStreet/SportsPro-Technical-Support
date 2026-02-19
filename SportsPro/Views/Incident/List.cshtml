@@ -1,4 +1,4 @@
-@model List<Incident>
+@model IncidentListViewModel
 @{
 	ViewData["Title"] = "Incident Manager";
 }
@@ -15,12 +15,14 @@
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var incident in Model)
+
+		@* Using ViewModel to display incidents *@
+		@foreach (Incident incident in Model.Incidents)
 		{
 			<tr>
 				<td>@incident.Title</td>
-				<td>@incident.Customer.FullName</td>
-				<td>@incident.Product.Name</td>
+				<td>@incident.Customer?.FullName</td>
+				<td>@incident.Product?.Name</td>
 				<td>@incident.DateOpened.ToShortDateString()</td>
 				<td>
 					<a class="btn btn-primary" asp-controller="Incident" asp-action="Edit"

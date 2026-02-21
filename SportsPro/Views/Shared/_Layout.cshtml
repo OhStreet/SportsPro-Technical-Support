@@ -53,7 +53,22 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
+        @* Flash/TempData message (shows once, then disappears on refresh) *@
+        @{
+            var flash = TempData["SuccessMessage"] as string;   // reading marks it for deletion
+            var kind = TempData["MessageType"] as string;       // optional; not set in controller
+            var alertClass = string.IsNullOrWhiteSpace(kind) ? "alert-success" : $"alert-{kind}";
+        }
+        @if (!string.IsNullOrWhiteSpace(flash))
+        {
+            <div class="alert @alertClass alert-dismissible fade show mt-2" role="alert">
+                @flash
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

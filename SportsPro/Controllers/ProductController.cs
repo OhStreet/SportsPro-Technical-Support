@@ -1,13 +1,12 @@
+
 using Microsoft.AspNetCore.Mvc;
 using SportsPro.Models;
-
 namespace SportsPro.Controllers
 {
     public class ProductController : Controller
     {
         // Database context for accessing Products table
         private SportsProContext context { get; set; }
-
         // Constructor injection of the DbContext
         public ProductController(SportsProContext ctx)
         {
@@ -16,7 +15,7 @@ namespace SportsPro.Controllers
 
         [HttpGet]
         [Route("Products")]
-        public IActionResult List()
+        public ViewResult List()
         {
             // Get all products ordered by release date
             var products = context.Products.OrderBy(p => p.ReleaseDate).ToList();
@@ -24,61 +23,65 @@ namespace SportsPro.Controllers
         }
 
         [HttpGet]
-        public IActionResult Add()
+        public ViewResult Add()
         {
             // Tell the shared Edit view we are adding a product
             ViewBag.Action = "Add";
-
             // Reuse the Edit view with a new empty Product
             return View("Edit", new Product());
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public ViewResult Edit(int id)
         {
             // Tell the shared Edit view we are editing
             ViewBag.Action = "Edit";
-
             // Find the product by primary key
             var product = context.Products.Find(id);
-            return View(product);
+            return View("Edit", product);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product)
         {
             // Only save if validation passes
             if (ModelState.IsValid)
             {
-                // New product if ID is 0
-                if (product.ProductID == 0)
+                bool isAdd = product.ProductID == 0;
+
+                // New or update
+                if (isAdd)
                 {
                     context.Products.Add(product);
                 }
-                // Existing product gets updated
                 else
                 {
                     context.Products.Update(product);
                 }
 
-                // Commit changes to the database
+                // Commit changes
                 context.SaveChanges();
 
+                // ✅ TempData success message (shown after redirect)
+                TempData["SuccessMessage"] = isAdd
+                    ? "Product added successfully!"
+                    : "Product updated successfully!";
+
                 // Go back to the product list
-                return RedirectToAction("List", "Product");
+                return RedirectToAction("List", "Product"); // RedirectToActionResult at runtime
             }
             else
             {
                 // Reset the action name if validation fails
                 ViewBag.Action = (product.ProductID == 0) ? "Add" : "Edit";
-
                 // Redisplay the form with validation errors
-                return View(product);
+                return View("Edit", product); // ViewResult at runtime
             }
         }
 
         [HttpGet]
-        public IActionResult Delete(int id)
+        public ViewResult Delete(int id)
         {
             // Grab the product to confirm deletion
             var product = context.Products.Find(id);
@@ -86,13 +89,16 @@ namespace SportsPro.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(Product product)
+        [ValidateAntiForgeryToken]
+        public RedirectToActionResult Delete(Product product)
         {
             // Remove the product from the database
             context.Products.Remove(product);
-
             // Save deletion
             context.SaveChanges();
+
+            // ✅ TempData success message (shown after redirect)
+            TempData["SuccessMessage"] = "Product deleted successfully!";
 
             // Back to the product list
             return RedirectToAction("List", "Product");

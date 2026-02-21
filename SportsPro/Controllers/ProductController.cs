@@ -1,12 +1,15 @@
 
 using Microsoft.AspNetCore.Mvc;
 using SportsPro.Models;
+using System.Linq; // Needed for OrderBy (if not using global usings)
+
 namespace SportsPro.Controllers
 {
     public class ProductController : Controller
     {
         // Database context for accessing Products table
         private SportsProContext context { get; set; }
+
         // Constructor injection of the DbContext
         public ProductController(SportsProContext ctx)
         {

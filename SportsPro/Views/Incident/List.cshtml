@@ -1,39 +1,67 @@
 @model IncidentListViewModel
+
 @{
-	ViewData["Title"] = "Incident Manager";
+    ViewData["Title"] = "Incident Manager";
 }
 
 <h1>Incident Manager</h1>
 
-<table class="table table-striped table-bordered">
-	<thead>
-		<tr>
-			<th>Title</th>
-			<th>Customer</th>
-			<th>Product</th>
-			<th>Date Opened</th>
-		</tr>
-	</thead>
-	<tbody>
+<!-- Filter Pills -->
+<ul class="nav nav-pills mb-3">
+    <li class="nav-item">
+        List
+            All
+        </a>
+    </li>
 
-		@* Using ViewModel to display incidents *@
-		@foreach (Incident incident in Model.Incidents)
-		{
-			<tr>
-				<td>@incident.Title</td>
-				<td>@incident.Customer?.FullName</td>
-				<td>@incident.Product?.Name</td>
-				<td>@incident.DateOpened.ToShortDateString()</td>
-				<td>
-					<a class="btn btn-primary" asp-controller="Incident" asp-action="Edit"
-					   asp-route-id="@incident.IncidentID">Edit</a>
-				</td>
-				<td>
-					<a class="btn btn-primary" asp-controller="Incident" asp-action="Delete"
-					   asp-route-id="@incident.IncidentID">Delete</a>
-				</td>
-			</tr>
-		}
-	</tbody>
+    <li class="nav-item">
+        List
+            Unassigned
+        </a>
+    </li>
+
+    <li class="nav-item">
+        List
+            Open
+        </a>
+    </li>
+</ul>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Date Opened</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (Incident incident in Model.Incidents)
+        {
+            <tr>
+                <td>@incident.Title</td>
+                <td>@incident.Customer?.FullName</td>
+                <td>@incident.Product?.Name</td>
+                <td>@incident.DateOpened.ToShortDateString()</td>
+
+                <td>
+                    Edit
+                        Edit
+                    </a>
+                </td>
+
+                <td>
+                    Delete
+                        Delete
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
 </table>
-<a asp-controller="Incident" asp-action="Add" class="btn btn-primary">Add Incident</a>
+
+AddAdd Incident</a>

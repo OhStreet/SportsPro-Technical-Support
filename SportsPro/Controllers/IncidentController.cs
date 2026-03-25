@@ -139,5 +139,41 @@ namespace SportsPro.Controllers
             context.SaveChanges();
             return RedirectToAction("List", "Incident");
         }
+        [HttpGet]
+[Route("Incidents")]
+public ViewResult List(string filter = "all")
+{
+    // Build base query
+    IQueryable<Incident> query = context.Incidents
+        .Include(i => i.Customer)
+        .Include(i => i.Product)
+        .Include(i => i.Technician)
+        .OrderBy(i => i.DateOpened);
+
+    // Apply filters
+    switch (filter.ToLower())
+    {
+        case "unassigned":
+            query = query.Where(i => i.TechnicianID == -1 || i.TechnicianID == null);
+            break;
+
+        case "open":
+            query = query.Where(i => i.DateClosed == null);
+            break;
+
+        default:    // "all"
+            filter = "all";
+            break;
+    }
+
+    // Build ViewModel
+    var model = new IncidentListViewModel
+    {
+        Incidents = query.ToList(),
+        CurrentFilter = filter
+    };
+
+    return View(model);
+}
     }
 }

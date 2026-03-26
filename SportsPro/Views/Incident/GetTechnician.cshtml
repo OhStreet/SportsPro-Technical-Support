@@ -1,9 +1,10 @@
-﻿@{
+@{
     ViewData["Title"] = "Select Technician";
 }
 
 <h2>Select Technician</h2>
 
+@* Form to select a technician *@
 <form asp-action="GetTechnician" method="post">
     <select name="technicianId" class="form-select">
         <option value="0">-- Select Technician --</option>

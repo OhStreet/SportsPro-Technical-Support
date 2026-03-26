@@ -169,7 +169,7 @@ namespace SportsPro.Controllers
 
 
         // GET action to display technician selection form
-        [HttpGet]
+        [HttpGet("techincident")]
         public IActionResult GetTechnician()
         {
             ViewBag.Technicians = context.Technicians
@@ -182,7 +182,7 @@ namespace SportsPro.Controllers
 
 
         // POST action to handle technician selection form submission
-        [HttpPost]
+        [HttpPost("techincident")]
         public IActionResult GetTechnician(int technicianId)
         {
             if (technicianId == 0)
@@ -206,7 +206,7 @@ namespace SportsPro.Controllers
 
         // GET action to display list of incidents
         // assigned to the logged-in technician
-        [HttpGet]
+        [HttpGet("techincident/list")]
         public IActionResult ListByTech()
         {
             var spSession = new SportsProSession(HttpContext.Session);
@@ -237,7 +237,7 @@ namespace SportsPro.Controllers
 
         // GET action to display edit form for a
         // specific incident assigned to the technician
-        [HttpGet]
+        [HttpGet("techincident/edit/{id}")]
         public IActionResult EditTech(int id)
         {
             var incident = context.Incidents

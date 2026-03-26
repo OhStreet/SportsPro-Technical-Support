@@ -6,6 +6,8 @@
 <form asp-action="EditTech" method="post">
     <input type="hidden" asp-for="IncidentID" />
 
+    @* This is important because these fields are required for the model 
+    binding to work correctly *@
     <input type="hidden" asp-for="CustomerID" />
     <input type="hidden" asp-for="ProductID" />
     <input type="hidden" asp-for="TechnicianID" />

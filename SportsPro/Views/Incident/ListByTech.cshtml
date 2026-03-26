@@ -1,10 +1,13 @@
-﻿@model IncidentListViewModel
+@model IncidentListViewModel
 
 
+@* Display a message if no incidents are assigned *@
 @if (!Model.Incidents.Any())
 {
     <p>No open incidents assigned.</p>
 }
+
+@* Display the list of incidents assigned to the technician *@
 else
 {
     <h3>Technician: @Model.Technician?.Name</h3>

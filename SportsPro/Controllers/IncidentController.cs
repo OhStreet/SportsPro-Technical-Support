@@ -36,6 +36,7 @@ namespace SportsPro.Controllers
                 .ToList();
         }
 
+
         // Using a ViewModel here to allow for future filtering by status, etc.
         // and cleaner code in the view. Also using subtype ViewResult
         [HttpGet]
@@ -45,10 +46,18 @@ namespace SportsPro.Controllers
             IQueryable<Incident> query = context.Incidents
                 .Include(i => i.Customer)
                 .Include(i => i.Product)
-                .Include(i => i.Technician)
-                .OrderBy(i => i.DateOpened);
+                .Include(i => i.Technician);
 
-            model.Incidents = query.ToList();
+            if (model.IncidentStatus == "unassigned")
+            {
+                query = query.Where(i => i.TechnicianID == -1);
+            }
+            else if (model.IncidentStatus == "open")
+            {
+                query = query.Where(i => i.DateClosed == null);
+            }
+
+            model.Incidents = query.OrderBy(i => i.DateOpened).ToList();
 
             return View(model);
         }
@@ -139,41 +148,129 @@ namespace SportsPro.Controllers
             context.SaveChanges();
             return RedirectToAction("List", "Incident");
         }
+
+
+
+        // ****************** TECHNICIAN UPDATE INCIDENT LOGIC ***************** //
+
+        // This section encapsulates the logic for a technician to
+        // to view the incidents that are assigned to them. 
+
+
+        // Remove technician from session and
+        // redirect to GetTechnician to select a new one
+        public IActionResult SwitchTechnician()
+        {
+            var spSession = new SportsProSession(HttpContext.Session);
+            spSession.RemoveTechnician();
+
+            return RedirectToAction("GetTechnician");
+        }
+
+
+        // GET action to display technician selection form
         [HttpGet]
-[Route("Incidents")]
-public ViewResult List(string filter = "all")
-{
-    // Build base query
-    IQueryable<Incident> query = context.Incidents
-        .Include(i => i.Customer)
-        .Include(i => i.Product)
-        .Include(i => i.Technician)
-        .OrderBy(i => i.DateOpened);
+        public IActionResult GetTechnician()
+        {
+            ViewBag.Technicians = context.Technicians
+                .Where(t => t.TechnicianID != -1)
+                .OrderBy(t => t.Name)
+                .ToList();
 
-    // Apply filters
-    switch (filter.ToLower())
-    {
-        case "unassigned":
-            query = query.Where(i => i.TechnicianID == -1 || i.TechnicianID == null);
-            break;
+            return View();
+        }
 
-        case "open":
-            query = query.Where(i => i.DateClosed == null);
-            break;
 
-        default:    // "all"
-            filter = "all";
-            break;
-    }
+        // POST action to handle technician selection form submission
+        [HttpPost]
+        public IActionResult GetTechnician(int technicianId)
+        {
+            if (technicianId == 0)
+            {
+                ModelState.AddModelError("", "Please select a technician.");
 
-    // Build ViewModel
-    var model = new IncidentListViewModel
-    {
-        Incidents = query.ToList(),
-        CurrentFilter = filter
-    };
+                ViewBag.Technicians = context.Technicians
+                    .Where(t => t.TechnicianID != -1)
+                    .OrderBy(t => t.Name)
+                    .ToList();
 
-    return View(model);
-}
+                return View();
+            }
+
+            var spSession = new SportsProSession(HttpContext.Session);
+            spSession.SetTechnicianId(technicianId);
+
+            return RedirectToAction("ListByTech");
+        }
+
+
+        // GET action to display list of incidents
+        // assigned to the logged-in technician
+        [HttpGet]
+        public IActionResult ListByTech()
+        {
+            var spSession = new SportsProSession(HttpContext.Session);
+            var technicianid = spSession.GetTechnicianId();
+
+            if (technicianid == null)
+            {
+                return RedirectToAction("GetTechnician");
+            }
+
+            var model = new IncidentListViewModel();
+
+            var incidents = context.Incidents
+                .Include(i => i.Customer)
+                .Include(i => i.Product)
+                .Include(i => i.Technician)
+                .Where(i => i.TechnicianID == technicianid && i.DateClosed == null)
+                .OrderBy(i => i.DateOpened)
+                .ToList();
+
+            model.Technician = context.Technicians.Find(technicianid);
+            model.Incidents = incidents;
+
+            return View(model);
+        }
+
+
+
+        // GET action to display edit form for a
+        // specific incident assigned to the technician
+        [HttpGet]
+        public IActionResult EditTech(int id)
+        {
+            var incident = context.Incidents
+                .Include(i => i.Customer)
+                .Include(i => i.Product)
+                .Include(i => i.Technician)
+                .FirstOrDefault(i => i.IncidentID == id);
+
+            return View(incident);
+        }
+
+
+        // POST action to handle edit form submission for a
+        // specific incident assigned to the technician
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditTech(Incident incident)
+        {
+            if (ModelState.IsValid)
+            {
+                context.Incidents.Update(incident);
+                context.SaveChanges();
+
+                return RedirectToAction("ListByTech");
+            }
+
+            incident = context.Incidents
+            .Include(i => i.Customer)
+            .Include(i => i.Product)
+            .Include(i => i.Technician)
+            .FirstOrDefault(i => i.IncidentID == incident.IncidentID);
+
+            return View(incident);
+        }
     }
 }

@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Select Technician";
+}
+
+<h2>Select Technician</h2>
+
+<form asp-action="GetTechnician" method="post">
+    <select name="technicianId" class="form-select">
+        <option value="0">-- Select Technician --</option>
+        @foreach (var tech in ViewBag.Technicians)
+        {
+            <option value="@tech.TechnicianID">@tech.Name</option>
+        }
+    </select>
+
+    <span class="text-danger">@Html.ValidationSummary()</span>
+
+    <button class="btn btn-primary mt-3">Select</button>
+</form>

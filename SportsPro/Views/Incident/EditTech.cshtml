@@ -1,0 +1,53 @@
+﻿@model Incident
+
+<h2>Edit Incident</h2>
+
+<form asp-action="EditTech" method="post">
+    <input type="hidden" asp-for="IncidentID" />
+
+    <input type="hidden" asp-for="CustomerID" />
+    <input type="hidden" asp-for="ProductID" />
+    <input type="hidden" asp-for="TechnicianID" />
+    <input type="hidden" asp-for="Title" />
+    <input type="hidden" asp-for="DateOpened" />
+
+    <div class="mb-3">
+        <label>Technician</label>
+        <input value="@Model.Technician?.Name" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Customer</label>
+        <input value="@Model.Customer?.FullName" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Product</label>
+        <input value="@Model.Product?.Name" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Title</label>
+        <input value="@Model.Title" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Date Opened</label>
+        <input value="@Model.DateOpened.ToShortDateString()" class="form-control" readonly />
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Date Closed</label>
+        <input asp-for="DateClosed" type="date" class="form-control" />
+        <span asp-validation-for="DateClosed" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary">Save</button>
+    <a asp-action="ListByTech" class="btn btn-secondary">Cancel</a>
+</form>

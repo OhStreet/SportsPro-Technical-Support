@@ -1,0 +1,40 @@
+﻿@model IncidentListViewModel
+
+
+@if (!Model.Incidents.Any())
+{
+    <p>No open incidents assigned.</p>
+}
+else
+{
+    <h3>Technician: @Model.Technician?.Name</h3>
+    <h2>Assigned/Open Incidents</h2>
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Date Opened</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model.Incidents)
+            {
+                <tr>
+                    <td>@i.Title</td>
+                    <td>@i.Customer?.FullName</td>
+                    <td>@i.Product?.Name</td>
+                    <td>@i.DateOpened.ToShortDateString()</td>
+                    <td>
+                        <a asp-action="EditTech" asp-route-id="@i.IncidentID"
+                           class="btn btn-primary">Edit</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="SwitchTechnician" class="btn btn-secondary">Switch Technician</a>

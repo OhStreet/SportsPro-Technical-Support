@@ -1,7 +1,8 @@
-﻿@model Incident
+@model Incident
 
 <h2>Edit Incident</h2>
 
+@* Form to edit an incident assigned to a technician *@
 <form asp-action="EditTech" method="post">
     <input type="hidden" asp-for="IncidentID" />
 

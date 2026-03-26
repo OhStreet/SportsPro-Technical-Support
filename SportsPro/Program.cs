@@ -14,6 +14,11 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<SportsProContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SportsPro")));
 
+
+// Add Session support
+builder.Services.AddMemoryCache();
+builder.Services.AddSession();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +33,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// Add Session middleware to the pipeline
+app.UseSession();
 
 app.UseAuthorization();
 

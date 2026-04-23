@@ -1,0 +1,24 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+}
+
+/* Custom styling for invalid input fields */
+input.input-validation-error {
+    border: 2px solid #dc3545;
+    background-color: #fff5f5;
+}

@@ -1,69 +1,68 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using SportsPro.DataLayer;
 using SportsPro.Models;
-
-// CRUD logic remains the same from Products/Technicians.
-// Only commenting on what is specific to Incidents
 
 namespace SportsPro.Controllers
 {
     public class IncidentController : Controller
     {
-        // DB context
-        private SportsProContext context;
+        // Here, we are using the Unit of Work pattern,
+        // so we have a single property for data access instead of
+        // multiple DbSet properties.
+        private IUnitOfWork Data { get; set; }
 
-        public IncidentController(SportsProContext context)
+        // Constructor injection of the Unit of Work
+        public IncidentController(IUnitOfWork data)
         {
-            this.context = context;
+            this.Data = data;
         }
 
-        // Helper function to load dropdowns on Add/Edit
+        // Load dropdown lists for customers, products, and technicians
+        // using the QueryOptions class to specify sorting and
+        // filtering criteria.
         private void LoadDropDowns(IncidentFormViewModel model)
         {
-            model.Customers = context.Customers
-                .OrderBy(c => c.LastName)
-                .ThenBy(c => c.FirstName)
-                .ToList();
+            model.Customers = Data.Customers.List(new QueryOptions<Customer>
+            {
+                OrderBy = c => c.LastName,
+                ThenOrderBy = c => c.FirstName
+            }).ToList();
 
-            model.Products = context.Products
-                .OrderBy(p => p.Name)
-                .ToList();
+            model.Products = Data.Products.List(new QueryOptions<Product>
+            {
+                OrderBy = p => p.Name
+            }).ToList();
 
-            // Same placeholder -1 filter here
-            model.Technicians = context.Technicians
-                .Where(t => t.TechnicianID > 0)
-                .OrderBy(t => t.Name)
-                .ToList();
+            model.Technicians = Data.Technicians.List(new QueryOptions<Technician>
+            {
+                Where = t => t.TechnicianID > 0,
+                OrderBy = t => t.Name
+            }).ToList();
         }
 
 
-        // Using a ViewModel here to allow for future filtering by status, etc.
-        // and cleaner code in the view. Also using subtype ViewResult
+        // using the QueryOptions class to specify
+        // sorting and filtering criteria for incidents.
         [HttpGet]
         [Route("Incidents")]
         public ViewResult List(IncidentListViewModel model)
         {
-            IQueryable<Incident> query = context.Incidents
-                .Include(i => i.Customer)
-                .Include(i => i.Product)
-                .Include(i => i.Technician);
+            var options = new QueryOptions<Incident>
+            {
+                Includes = "Customer, Product, Technician",
+                OrderBy = i => i.DateOpened
+            };
 
             if (model.IncidentStatus == "unassigned")
-            {
-                query = query.Where(i => i.TechnicianID == -1);
-            }
+                options.Where = i => i.TechnicianID == -1;
             else if (model.IncidentStatus == "open")
-            {
-                query = query.Where(i => i.DateClosed == null);
-            }
+                options.Where = i => i.DateClosed == null;
 
-            model.Incidents = query.OrderBy(i => i.DateOpened).ToList();
+            model.Incidents = Data.Incidents.List(options).ToList();
 
             return View(model);
         }
 
-        // Using a view model here for the Add/Edit views to allow for dropdown lists and cleaner code.
-        // Also using subtype ViewResult
         [HttpGet]
         public ViewResult Add()
         {
@@ -72,34 +71,28 @@ namespace SportsPro.Controllers
                 OperationMode = "Add",
                 CurrentIncident = new Incident()
             };
-
             LoadDropDowns(model);
-
             return View("Edit", model);
         }
 
 
-        // Using a view model here for the Add/Edit views to allow for dropdown lists and cleaner code.
-        // Also using subtype ViewResult
+        // Using Unit of Work pattern,
+        // we can use the same Edit view for both adding and editing incidents.
         [HttpGet]
         public ViewResult Edit(int id)
         {
-            var incident = context.Incidents.Find(id);
-
+            var incident = Data.Incidents.Get(id);
             var model = new IncidentFormViewModel
             {
                 OperationMode = "Edit",
                 CurrentIncident = incident
             };
-
             LoadDropDowns(model);
-
             return View("Edit", model);
         }
 
-        // Using a view model here for the Edit POST action to allow for dropdown lists and cleaner code.
-        // This may return either ViewResult or RedirectToActionResult so leaving it as 
-        // IActionResult
+
+        // Using Unit of Work pattern for edit post action
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(IncidentFormViewModel model)
@@ -107,81 +100,63 @@ namespace SportsPro.Controllers
             if (ModelState.IsValid)
             {
                 if (model.CurrentIncident.IncidentID == 0)
-                {
-                    context.Incidents.Add(model.CurrentIncident);
-                }
+                    Data.Incidents.Insert(model.CurrentIncident);
                 else
-                {
-                    context.Incidents.Update(model.CurrentIncident);
-                }
+                    Data.Incidents.Update(model.CurrentIncident);
 
-                context.SaveChanges();
+                Data.Save();
                 return RedirectToAction("List");
             }
 
-            // If validation fails, reload dropdowns
             LoadDropDowns(model);
             return View("Edit", model);
         }
 
-
-        // Delete GET/POST
-        // Using subtype ViewResult
+        // Using Unit of Work pattern for delete confirmation view
         [HttpGet]
         public ViewResult Delete(int id)
         {
-            var incident = context.Incidents
-                .Include(i => i.Customer)
-                .Include(i => i.Product)
-                .Include(i => i.Technician)
-                .FirstOrDefault(i => i.IncidentID == id);
-
+            var incident = Data.Incidents.Get(new QueryOptions<Incident>
+            {
+                Includes = "Customer, Product, Technician",
+                Where = i => i.IncidentID == id
+            });
             return View("Delete", incident);
         }
 
-        // Using subtype RedirectToActionResult
+        // Using Unit of Work pattern for delete post action
         [HttpPost]
         [ValidateAntiForgeryToken]
         public RedirectToActionResult Delete(Incident incident)
         {
-            context.Incidents.Remove(incident);
-            context.SaveChanges();
+            Data.Incidents.Delete(incident);
+            Data.Save();
             return RedirectToAction("List", "Incident");
         }
 
-
-
         // ****************** TECHNICIAN UPDATE INCIDENT LOGIC ***************** //
 
-        // This section encapsulates the logic for a technician to
-        // to view the incidents that are assigned to them. 
-
-
-        // Remove technician from session and
-        // redirect to GetTechnician to select a new one
         public IActionResult SwitchTechnician()
         {
             var spSession = new SportsProSession(HttpContext.Session);
             spSession.RemoveTechnician();
-
             return RedirectToAction("GetTechnician");
         }
 
-
-        // GET action to display technician selection form
+        // Using Unit of Work pattern to get a list of
+        // technicians for the dropdown
         [HttpGet]
         public IActionResult GetTechnician()
         {
-            ViewBag.Technicians = context.Technicians
-                .Where(t => t.TechnicianID != -1)
-                .OrderBy(t => t.Name)
-                .ToList();
-
+            ViewBag.Technicians = Data.Technicians.List(new QueryOptions<Technician>
+            {
+                Where = t => t.TechnicianID != -1,
+                OrderBy = t => t.Name
+            });
             return View();
         }
 
-
-        // POST action to handle technician selection form submission
+        // Using Unit of Work pattern to set the selected technician in session
         [HttpPost]
         public IActionResult GetTechnician(int technicianId)
         {
@@ -189,86 +164,79 @@ namespace SportsPro.Controllers
             {
                 ModelState.AddModelError("", "Please select a technician.");
 
-                ViewBag.Technicians = context.Technicians
-                    .Where(t => t.TechnicianID != -1)
-                    .OrderBy(t => t.Name)
-                    .ToList();
+                ViewBag.Technicians = Data.Technicians.List(new QueryOptions<Technician>
+                {
+                    Where = t => t.TechnicianID != -1,
+                    OrderBy = t => t.Name
+                });
 
                 return View();
             }
 
             var spSession = new SportsProSession(HttpContext.Session);
             spSession.SetTechnicianId(technicianId);
-
             return RedirectToAction("ListByTech");
         }
 
-
-        // GET action to display list of incidents
-        // assigned to the logged-in technician
+        // Using Unit of Work pattern to get a list of incidents
+        // for the selected technician
         [HttpGet]
         public IActionResult ListByTech()
         {
             var spSession = new SportsProSession(HttpContext.Session);
-            var technicianid = spSession.GetTechnicianId();
+            var technicianId = spSession.GetTechnicianId();
 
-            if (technicianid == null)
-            {
+            if (technicianId == null)
                 return RedirectToAction("GetTechnician");
-            }
+
+            // Two WHERE clauses: filter by technician AND open incidents (chapter 13 pattern)
+            var options = new QueryOptions<Incident>
+            {
+                Includes = "Customer, Product, Technician",
+                OrderBy = i => i.DateOpened
+            };
+            options.Where = i => i.TechnicianID == technicianId;
+            options.Where = i => i.DateClosed == null;
 
             var model = new IncidentListViewModel();
-
-            var incidents = context.Incidents
-                .Include(i => i.Customer)
-                .Include(i => i.Product)
-                .Include(i => i.Technician)
-                .Where(i => i.TechnicianID == technicianid && i.DateClosed == null)
-                .OrderBy(i => i.DateOpened)
-                .ToList();
-
-            model.Technician = context.Technicians.Find(technicianid);
-            model.Incidents = incidents;
+            model.Technician = Data.Technicians.Get((int)technicianId);
+            model.Incidents = Data.Incidents.List(options).ToList();
 
             return View(model);
         }
 
 
-
-        // GET action to display edit form for a
-        // specific incident assigned to the technician
+        // Using Unit of Work pattern to get the incident for
+        // editing and then updating it
         [HttpGet]
         public IActionResult EditTech(int id)
         {
-            var incident = context.Incidents
-                .Include(i => i.Customer)
-                .Include(i => i.Product)
-                .Include(i => i.Technician)
-                .FirstOrDefault(i => i.IncidentID == id);
-
+            var incident = Data.Incidents.Get(new QueryOptions<Incident>
+            {
+                Includes = "Customer, Product, Technician",
+                Where = i => i.IncidentID == id
+            });
             return View(incident);
         }
 
 
-        // POST action to handle edit form submission for a
-        // specific incident assigned to the technician
+        // Using Unit of Work pattern to update the incident after editing
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult EditTech(Incident incident)
         {
             if (ModelState.IsValid)
             {
-                context.Incidents.Update(incident);
-                context.SaveChanges();
-
+                Data.Incidents.Update(incident);
+                Data.Save();
                 return RedirectToAction("ListByTech");
             }
 
-            incident = context.Incidents
-            .Include(i => i.Customer)
-            .Include(i => i.Product)
-            .Include(i => i.Technician)
-            .FirstOrDefault(i => i.IncidentID == incident.IncidentID);
+            incident = Data.Incidents.Get(new QueryOptions<Incident>
+            {
+                Includes = "Customer, Product, Technician",
+                Where = i => i.IncidentID == incident.IncidentID
+            }) ?? incident;
 
             return View(incident);
         }

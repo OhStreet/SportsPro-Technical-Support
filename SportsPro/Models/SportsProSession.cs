@@ -1,8 +1,9 @@
-﻿namespace SportsPro.Models
+namespace SportsPro.Models
 {
     public class SportsProSession
     {
         private const string TechKey = "technicianid";
+        private const string CustomerKey = "customerid";
 
         private ISession session { get; set; }
 
@@ -24,6 +25,23 @@
         public void RemoveTechnician()
         {
             session.Remove(TechKey);
+        }
+
+
+        // Customer session management methods
+        public void SetCustomerId(int customerId)
+        {
+            session.SetInt32(CustomerKey, customerId);
+        }
+
+        public int? GetCustomerId()
+        {
+            return session.GetInt32(CustomerKey);
+        }
+
+        public void RemoveCustomer()
+        {
+            session.Remove(CustomerKey);
         }
     }
 }

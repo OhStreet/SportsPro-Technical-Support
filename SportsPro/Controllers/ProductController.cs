@@ -1,109 +1,107 @@
-
 using Microsoft.AspNetCore.Mvc;
+using SportsPro.DataLayer;
 using SportsPro.Models;
-using System.Linq; // Needed for OrderBy (if not using global usings)
 
 namespace SportsPro.Controllers
 {
     public class ProductController : Controller
     {
-        // Database context for accessing Products table
-        private SportsProContext context { get; set; }
+        // Using the Repository pattern,
+        // we have a single property for data access instead of
+        // multiple DbSet properties.
+        private Repository<Product> products { get; set; }
 
-        // Constructor injection of the DbContext
-        public ProductController(SportsProContext ctx)
+
+        // Constructor injection of the Repository
+        public ProductController(IUnitOfWork data)
         {
-            this.context = ctx;
+            products = data.Products;
         }
 
+
+        // using the QueryOptions class to specify ordering by ReleaseDate
         [HttpGet]
         [Route("Products")]
         public ViewResult List()
         {
-            // Get all products ordered by release date
-            var products = context.Products.OrderBy(p => p.ReleaseDate).ToList();
-            return View(products);
+            var productList = products.List(new QueryOptions<Product>
+            {
+                OrderBy = p => p.ReleaseDate
+            });
+            return View(productList);
         }
 
         [HttpGet]
         public ViewResult Add()
         {
-            // Tell the shared Edit view we are adding a product
             ViewBag.Action = "Add";
-            // Reuse the Edit view with a new empty Product
             return View("Edit", new Product());
         }
 
+
+
+        // Using the repository for edit view
         [HttpGet]
         public ViewResult Edit(int id)
         {
-            // Tell the shared Edit view we are editing
             ViewBag.Action = "Edit";
-            // Find the product by primary key
-            var product = context.Products.Find(id);
+            var product = products.Get(id);
             return View("Edit", product);
         }
 
+
+
+        // Using the repository to add or update a product
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product)
         {
-            // Only save if validation passes
             if (ModelState.IsValid)
             {
                 bool isAdd = product.ProductID == 0;
 
-                // New or update
                 if (isAdd)
-                {
-                    context.Products.Add(product);
-                }
+                    products.Insert(product);
                 else
-                {
-                    context.Products.Update(product);
-                }
+                    products.Update(product);
 
-                // Commit changes
-                context.SaveChanges();
+                products.Save();
 
-                // ✅ TempData success message (shown after redirect)
                 TempData["SuccessMessage"] = isAdd
                     ? "Product added successfully!"
                     : "Product updated successfully!";
 
-                // Go back to the product list
-                return RedirectToAction("List", "Product"); // RedirectToActionResult at runtime
+                return RedirectToAction("List", "Product");
             }
             else
             {
-                // Reset the action name if validation fails
                 ViewBag.Action = (product.ProductID == 0) ? "Add" : "Edit";
-                // Redisplay the form with validation errors
-                return View("Edit", product); // ViewResult at runtime
+                return View("Edit", product);
             }
         }
 
+
+
+
+        // Using the repository to return a product for confirmation of deletion
         [HttpGet]
         public ViewResult Delete(int id)
         {
-            // Grab the product to confirm deletion
-            var product = context.Products.Find(id);
+            var product = products.Get(id);
             return View(product);
         }
 
+
+
+        // Using the repository to delete a product
         [HttpPost]
         [ValidateAntiForgeryToken]
         public RedirectToActionResult Delete(Product product)
         {
-            // Remove the product from the database
-            context.Products.Remove(product);
-            // Save deletion
-            context.SaveChanges();
+            products.Delete(product);
+            products.Save();
 
-            // ✅ TempData success message (shown after redirect)
             TempData["SuccessMessage"] = "Product deleted successfully!";
-
-            // Back to the product list
             return RedirectToAction("List", "Product");
         }
     }

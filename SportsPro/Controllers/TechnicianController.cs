@@ -1,100 +1,95 @@
 using Microsoft.AspNetCore.Mvc;
+using SportsPro.DataLayer;
 using SportsPro.Models;
 
 namespace SportsPro.Controllers
 {
     public class TechnicianController : Controller
     {
-        // Database context for accessing Technicians table
-        private SportsProContext context { get; set; }
 
-        // Constructor injection of the DbContext
-        public TechnicianController(SportsProContext ctx)
+        // Using the Repository pattern for technicians
+        private Repository<Technician> technicians { get; set; }
+
+
+        // Constructor injection of the Repository for technicians
+        public TechnicianController(IUnitOfWork data)
         {
-            this.context = ctx;
+            technicians = data.Technicians;
         }
 
+
+        // using the QueryOptions class to specify ordering by Name and
+        // excluding the default technician with TechnicianID of -1
         [HttpGet]
         [Route("Technicians")]
         public IActionResult List()
         {
-            // Get all technicians except the placeholder (-1), ordered by name
-            var technicians = context.Technicians
-                                     .Where(t => t.TechnicianID != -1)
-                                     .OrderBy(t => t.Name)
-                                     .ToList();
-
-            return View(technicians);
+            var techList = technicians.List(new QueryOptions<Technician>
+            {
+                Where = t => t.TechnicianID != -1,
+                OrderBy = t => t.Name
+            });
+            return View(techList);
         }
 
 
         [HttpGet]
         public IActionResult Add()
         {
-            // Tell the shared Edit view we are adding a technician
             ViewBag.Action = "Add";
-
-            // Reuse the Edit view with a new empty Technician
             return View("Edit", new Technician());
         }
 
+
+
+        // Using repository for Edit view
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            // Tell the shared Edit view we are editing
             ViewBag.Action = "Edit";
-
-            // Find the technician by primary key
-            var technician = context.Technicians.Find(id);
+            var technician = technicians.Get(id);
             return View(technician);
         }
 
+
+
+        // Using repository for Add or edit a technician
         [HttpPost]
         public IActionResult Edit(Technician technician)
         {
-            // Only save if validation passes
             if (ModelState.IsValid)
             {
-                // New technician if ID is 0
                 if (technician.TechnicianID == 0)
-                {
-                    context.Technicians.Add(technician);
-                }
-                // Existing technician gets updated
+                    technicians.Insert(technician);
                 else
-                {
-                    context.Technicians.Update(technician);
-                }
+                    technicians.Update(technician);
 
-                // Commit changes
-                context.SaveChanges();
-
-                // Back to technician list
+                technicians.Save();
                 return RedirectToAction("List", "Technician");
             }
             else
             {
-                // Reset action name if validation fails
                 ViewBag.Action = (technician.TechnicianID == 0) ? "Add" : "Edit";
                 return View(technician);
             }
         }
 
+
+        // Using repository for delete confirmation view of a technician
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            // Grab technician to confirm deletion
-            var technician = context.Technicians.Find(id);
+            var technician = technicians.Get(id);
             return View(technician);
         }
 
+
+        // Using repository for deletion of a technician
         [HttpPost]
         public IActionResult Delete(Technician technician)
         {
-            // Remove technician
-            context.Technicians.Remove(technician);
-            context.SaveChanges();
-
+            technicians.Delete(technician);
+            technicians.Save();
             return RedirectToAction("List", "Technician");
         }
     }

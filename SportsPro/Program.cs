@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SportsPro.DataLayer;
 using SportsPro.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,9 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<SportsProContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SportsPro")));
+
+// Register Unit of Work for dependency injection
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 
 
 // Add Session support

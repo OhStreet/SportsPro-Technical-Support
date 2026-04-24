@@ -13,17 +13,12 @@ namespace SportsPro.Controllers
         private IUnitOfWork Data { get; set; }
 
 
-
-
         // The constructor takes an IUnitOfWork parameter
         // and assigns it to the private Data fieldd.
         public CustomerController(IUnitOfWork data)
         {
             this.Data = data;
         }
-
-
-
 
         // Uses the UnitOfWork to get a list of countries from the database,
         // ordered by name, and stores it in the ViewBag for use in the views.
